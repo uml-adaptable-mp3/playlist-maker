@@ -53,7 +53,7 @@ class PlistMaker(tk.Frame):
                                     bg='#80c1ff',
                                     justify=tk.LEFT,
                                     anchor='w',
-                                    font=20)
+                                    font=('', 16))
         self.entry_title.place(relx=0, rely=0.15, relwidth=0.45, height=25)
 
         self.save_dir_browser = tk.Button(self.frame,
@@ -68,16 +68,35 @@ class PlistMaker(tk.Frame):
                                        bg='#80c1ff',
                                        justify=tk.LEFT,
                                        anchor='w',
-                                       font=('',10))
+                                       font=('', 10))
         self.save_dir_label.place(x=90, rely=0.3, width=400)
 
     def create_display_field(self):
-        self.plist_display = tk.Label(self.frame,
-                                      anchor='nw',
-                                      justify='left',
-                                      text="Display MP3s here")
-        self.plist_display.place(
-            relx=0.55, rely=0.2, relwidth=0.45, relheight=0.6)
+        self.plist_display = tk.Listbox(self.frame,
+                                        width=20,
+                                        height=20,
+                                        justify='left',
+                                        font=('',10))
+        self.plist_display.pack(side='left', fill='y')
+        self.plist_display.place(relx=0.55, rely=0.2,
+                                 relwidth=0.45, relheight=0.6)
+
+        self.scrollbar = tk.Scrollbar(self.plist_display, orient="vertical")
+        self.scrollbar.config(command=self.plist_display.yview)
+        self.scrollbar.pack(side="right", fill="y")
+        self.plist_display.config(yscrollcommand=self.scrollbar.set)
+        
+        #! For Testing purposes
+        for x in range(50):
+            self.plist_display.insert('end', "song {}".format(x))
+
+        self.plist_top_text = tk.Label(self.frame,
+                                       anchor='w',
+                                       justify='left',
+                                       text="Songs List:",
+                                       bg='#80c1ff',
+                                       font=('', 16))
+        self.plist_top_text.place(relx=0.55, rely=0.15)
 
     def say_hi(self):
         print("hello there")
@@ -92,7 +111,7 @@ class PlistMaker(tk.Frame):
         filename = re.sub(r"\s+", '_', plain_entry)
         filename = os.path.join(filename + ".m3u")
         return (plain_entry, filename)
-    
+
     def browse_save_dir(self):
         save_dir = filedialog.askdirectory(title="Select Folder")
         self.save_dir.set(save_dir)
