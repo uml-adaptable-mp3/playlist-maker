@@ -3,6 +3,7 @@ import tkinter as tk
 from tkinter import filedialog
 import re
 import os
+from lib import Playlist
 
 # CONSTANTS
 APP_HEIGHT = 600
@@ -85,7 +86,7 @@ class PlistMaker(tk.Frame):
         self.scrollbar.config(command=self.plist_display.yview)
         self.scrollbar.pack(side="right", fill="y")
         self.plist_display.config(yscrollcommand=self.scrollbar.set)
-        
+
         #! For Testing purposes
         for x in range(50):
             self.plist_display.insert('end', "song {}".format(x))

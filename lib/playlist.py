@@ -9,7 +9,7 @@ class Playlist(object):
         self.title = title
         self.song_list = []
         self.__metadata_regex_strings = {
-            "title": r"#PLAYLIST:\s(.*)"
+            "title": r"^#PLAYLIST:\s(.*)$"
         }
 
     @property
@@ -24,7 +24,7 @@ class Playlist(object):
             raise ValueError
 
     # m3u format: https://en.wikipedia.org/wiki/M3U
-    def export(self, filepath, filename, overwrite=False):
+    def export(self, filepath, filename, overwrite=False, force_title=None):
         if not os.path.isdir(filepath):
             # invalid filepath given
             print(f"Error: Could not find path {filepath}")
@@ -65,8 +65,8 @@ class Playlist(object):
                 playlist.write("#EXTM3U\n")
 
                 # write gloabal metadata
-                if self.title != '':
-                    playlist.write(f"#PLAYLIST: {self.title}\n")
+                if self.title != '' or force_title is not None:
+                    playlist.write(f"#PLAYLIST: {self.title if self.title != '' else force_title}\n")
 
                 # copy songs to playlist file
                 for song in self.song_list:
@@ -75,7 +75,6 @@ class Playlist(object):
 
         except PermissionError:
             print(f"Error: Permission Denied. Unable to write playlist at {playlist_path}")
-
 
     def import_existing(self, filepath):
         if not os.path.isfile(filepath):
