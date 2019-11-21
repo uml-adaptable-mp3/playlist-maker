@@ -33,12 +33,13 @@ class PlistMaker(tk.Frame):
         self.create_entry_field()
         self.create_display_field()
         self.create_export_button()
+        self.display_logo()
 
     def create_import_button(self):
         self.import_button = tk.Button(self.frame,
                                   text="Import Existing Playlist",
                                   command=lambda: self.import_existing())
-        self.import_button.place(relx=0.01, rely=0.01, relwidth=0.5, relheight=0.1)
+        self.import_button.place(relx=0.01, rely=0.31, relwidth=0.4, relheight=0.1)
 
     def create_quit_button(self):
         self.quit = tk.Button(self.frame,
@@ -49,7 +50,7 @@ class PlistMaker(tk.Frame):
 
     def create_entry_field(self):
         self.entry = tk.Entry(self.frame)
-        self.entry.place(relx=0, rely=0.2, relwidth=0.45, height=25)
+        self.entry.place(relx=0, rely=0.5, relwidth=0.45, height=25)
 
         self.entry_title = tk.Label(self.frame,
                                     text="Enter Playlist Name:",
@@ -57,7 +58,7 @@ class PlistMaker(tk.Frame):
                                     justify=tk.LEFT,
                                     anchor='w',
                                     font=('', 16))
-        self.entry_title.place(relx=0, rely=0.15, relwidth=0.45, height=25)
+        self.entry_title.place(relx=0, rely=0.45, relwidth=0.45, height=25)
 
         self.save_dir_title = tk.Label(self.frame,
                                        text="Select Save Location:",
@@ -65,12 +66,12 @@ class PlistMaker(tk.Frame):
                                        justify=tk.LEFT,
                                        anchor='w',
                                        font=('', 16))
-        self.save_dir_title.place(relx=0, rely=0.3, relwidth=0.45, height=25)
+        self.save_dir_title.place(relx=0, rely=0.6, relwidth=0.45, height=25)
 
         self.save_dir_browser = tk.Button(self.frame,
                                           text="Browse",
                                           command=lambda: self.browse_save_dir())
-        self.save_dir_browser.place(relx=0, rely=0.35, width=80, height=30)
+        self.save_dir_browser.place(relx=0, rely=0.65, width=80, height=30)
 
 
         self.save_dir = tk.StringVar(self)
@@ -81,7 +82,7 @@ class PlistMaker(tk.Frame):
                                        justify=tk.LEFT,
                                        anchor='w',
                                        font=('', 10))
-        self.save_dir_label.place(x=90, rely=0.35, width=400)
+        self.save_dir_label.place(x=90, rely=0.65, width=400)
 
     def create_display_field(self):
         self.plist_display = tk.Listbox(self.frame,
@@ -139,7 +140,7 @@ class PlistMaker(tk.Frame):
 
     def create_export_button(self):
         self.export_button = tk.Button(self.frame, text="Export", command=self.export)
-        self.export_button.place(relx=0.05, rely=0.6, relwidth=0.4, relheight=0.25)
+        self.export_button.place(relx=0.01, rely=0.75, relwidth=0.4, relheight=0.1)
         self.export_button.configure(state=tk.DISABLED)
         # add an event to the save dir so that this button can be enabled once it is selected
         def on_select_save_dir(*args):
@@ -174,6 +175,11 @@ class PlistMaker(tk.Frame):
                 self.playlist.export(self.save_dir.get(), filename, overwrite=True)
         except Exception as e:
             print(e)
+
+    def display_logo(self):
+        self.logo = tk.PhotoImage(file="images/umass_lowell.gif")
+        self.logo_label = tk.Label(self.frame, image=self.logo)
+        self.logo_label.place(relx=0.0, rely=0, relwidth=0.5, relheight=0.27)
 
     def get_pl_name(self):
         from_entry = self.entry.get()
