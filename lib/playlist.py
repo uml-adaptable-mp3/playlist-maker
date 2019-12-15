@@ -78,6 +78,12 @@ class Playlist(object):
                     playlist.write(f"../Music/{os.path.basename(song)}\n")
 
             if not skip_all_songs_playlist:
+                # update the list of playlists in the Playlist directory
+                all_playlists = [x for x in os.listdir(playlist_dir) if x[-4:] == ".m3u"]
+                with open(os.path.join(playlist_dir, "__playlists.txt"), 'w') as list_file:
+                    list_file.writelines(sorted([x + '\n' for x in all_playlists], key=str.casefold))
+                    
+
                 self.create_all_songs_playlist(music_dir)
 
         except PermissionError:
