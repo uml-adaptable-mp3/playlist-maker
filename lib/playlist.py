@@ -24,39 +24,43 @@ class Playlist(object):
             raise ValueError
 
     # m3u format: https://en.wikipedia.org/wiki/M3U
-    def export(self, filepath, filename, overwrite=False, force_title=None):
+    def export(self, filepath, filename, overwrite=False, force_title=None, skip_all_songs_playlist=False, write_playlist_only=False):
         if not os.path.isdir(filepath):
             # invalid filepath given
             print(f"Error: Could not find path {filepath}")
             raise FileNotFoundError
+        
         music_dir = os.path.join(filepath, "Music")
         playlist_dir = os.path.join(filepath, "Playlists")
         playlist_path = os.path.join(playlist_dir, filename)
 
-        # make dirs if they don't exist yet
-        if not os.path.isdir(music_dir):
-            os.mkdir(music_dir)
-        if not os.path.isdir(playlist_dir):
-            os.mkdir(playlist_dir)
+        if not write_playlist_only:
+            # make dirs if they don't exist yet
+            if not os.path.isdir(music_dir):
+                os.mkdir(music_dir)
+            if not os.path.isdir(playlist_dir):
+                os.mkdir(playlist_dir)
 
-        # check if file exists already in playlists
-        if os.path.isfile(playlist_path) and overwrite == False:
-            # error because file already exists
-            print("Error: Playlist already exists.")
-            raise FileExistsError
+            # check if file exists already in playlists
+            if os.path.isfile(playlist_path) and overwrite == False:
+                # error because file already exists
+                print("Error: Playlist already exists.")
+                raise FileExistsError
 
-        # copy music to music directory on flash drive
-        for song in self.song_list:
-            try:
-                shutil.copyfile(song, os.path.join(music_dir, os.path.basename(song)))
-            except shutil.SameFileError:
-                print("File already exists, skipping")
-            except IsADirectoryError:
-                print("Destination is a directory.")
-            except PermissionError:
-                print(f"Error: Permission Denied. Unable to copy {song} to {music_dir}")
-            except:
-                print("Error occurred while copying file.")
+            # copy music to music directory on flash drive
+            for song in self.song_list:
+                try:
+                    shutil.copyfile(song, os.path.join(music_dir, os.path.basename(song)))
+                except shutil.SameFileError:
+                    print("File already exists, skipping")
+                except IsADirectoryError:
+                    print("Destination is a directory.")
+                except PermissionError:
+                    print(f"Error: Permission Denied. Unable to copy {song} to {music_dir}")
+                except:
+                    print("Error occurred while copying file.")
+        else:  # write_playlist_only is True
+            playlist_path = os.path.join(filepath, filename)
 
         # write data to a playlist file using the M3U format
         try:
@@ -71,12 +75,16 @@ class Playlist(object):
                 # copy songs to playlist file
                 for song in self.song_list:
                     # TODO: write song metadata?
-                    playlist.write(f"D:Music/{os.path.basename(song)}\n")
+                    playlist.write(f"../Music/{os.path.basename(song)}\n")
+
+            if not skip_all_songs_playlist:
+                self.create_all_songs_playlist(music_dir)
 
         except PermissionError:
             print(f"Error: Permission Denied. Unable to write playlist at {playlist_path}")
 
     def import_existing(self, filepath):
+        print(f"IMPORTING {filepath}")
         if not os.path.isfile(filepath):
             # invalid filepath given
             print(f"Error: Could not find file {filepath}")
@@ -98,8 +106,11 @@ class Playlist(object):
                         # path to a song, try to find it
                         translated_dir = os.path.normpath(os.path.join(os.path.dirname(filepath), "..", "Music"))
                         translated_dir += (os.path.sep)
+                        print(filepath)
+                        print(translated_dir)
                         # replace the VSOS path ("D:Music/") with the system's path to the actual files
                         line = line.replace("D:Music/", translated_dir, 1)
+                        line = line.replace("../Music/", translated_dir, 1)
                         line = line.strip()  # strip the trailing newline
 
                         if not os.path.isfile(line):
@@ -112,6 +123,13 @@ class Playlist(object):
         finally:
             self.title = title
             self.song_list = song_list
+
+    @staticmethod
+    def create_all_songs_playlist(music_dir):
+        all_songs_playlist = Playlist(title="All Music")
+        all_songs_playlist.song_list.extend(x for x in os.listdir(music_dir) if x[-4:] == ".mp3")
+        all_songs_playlist.song_list.sort(key=str.casefold)
+        all_songs_playlist.export(music_dir, "__all_songs.m3u", skip_all_songs_playlist=True, write_playlist_only=True)
 
     def __parse_comment(self, comment_string):
         data = dict()
